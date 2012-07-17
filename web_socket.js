@@ -3,38 +3,23 @@
 // Reference: http://dev.w3.org/html5/websockets/
 // Reference: http://tools.ietf.org/html/rfc6455
 
-(function() {
+this.FlashWebSocket = (function() {
+
+  var protocol = window.location.protocol;
+  var __swfLocation
+    = protocol
+    + '//'
+    + Defaults.HOST
+    + ':'
+    + (protocol == 'https:') ? Defaults.WSS_PORT : Defaults.WS_PORT
+    + Defaults.STATIC_PATH
+    + 'WebSocketMainInsecure.swf';
   
-  if (window.WEB_SOCKET_FORCE_FLASH) {
-    // Keeps going.
-  } else if (window.WebSocket) {
-    return;
-  } else if (window.MozWebSocket) {
-    // Firefox.
-    window.WebSocket = MozWebSocket;
-    return;
-  }
-  
-  var logger;
-  if (window.WEB_SOCKET_LOGGER) {
-    logger = WEB_SOCKET_LOGGER;
-  } else if (window.console && window.console.log && window.console.error) {
+  if (window.console && window.console.log && window.console.error) {
     // In some environment, console is defined but console.log or console.error is missing.
-    logger = window.console;
+	logger = window.console;
   } else {
-    logger = {log: function(){ }, error: function(){ }};
-  }
-  
-  // swfobject.hasFlashPlayerVersion("10.0.0") doesn't work with Gnash.
-  if (swfobject.getFlashPlayerVersion().major < 10) {
-    logger.error("Flash Player >= 10.0.0 is required.");
-    return;
-  }
-  if (location.protocol == "file:") {
-    logger.error(
-      "WARNING: web-socket-js doesn't work in file:///... URL " +
-      "unless you set Flash Security Settings properly. " +
-      "Open the page via Web server i.e. http://...");
+	logger = {log: function(){ }, error: function(){ }};
   }
 
   /**
@@ -45,7 +30,7 @@
    * @param {int} proxyPort
    * @param {string} headers
    */
-  window.WebSocket = function(url, protocols, proxyHost, proxyPort, headers) {
+  WebSocket = function(url, protocols, proxyHost, proxyPort, headers) {
     var self = this;
     self.__id = WebSocket.__nextId++;
     WebSocket.__instances[self.__id] = self;
@@ -254,27 +239,6 @@
     if (WebSocket.__initialized) return;
     WebSocket.__initialized = true;
     
-    if (WebSocket.__swfLocation) {
-      // For backword compatibility.
-      window.WEB_SOCKET_SWF_LOCATION = WebSocket.__swfLocation;
-    }
-    if (!window.WEB_SOCKET_SWF_LOCATION) {
-      logger.error("[WebSocket] set WEB_SOCKET_SWF_LOCATION to location of WebSocketMain.swf");
-      return;
-    }
-    if (!window.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR &&
-        !WEB_SOCKET_SWF_LOCATION.match(/(^|\/)WebSocketMainInsecure\.swf(\?.*)?$/) &&
-        WEB_SOCKET_SWF_LOCATION.match(/^\w+:\/\/([^\/]+)/)) {
-      var swfHost = RegExp.$1;
-      if (location.host != swfHost) {
-        logger.error(
-            "[WebSocket] You must host HTML and WebSocketMain.swf in the same host " +
-            "('" + location.host + "' != '" + swfHost + "'). " +
-            "See also 'How to host HTML file and SWF file in different domains' section " +
-            "in README.md. If you use WebSocketMainInsecure.swf, you can suppress this message " +
-            "by WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;");
-      }
-    }
     var container = document.createElement("div");
     container.id = "webSocketContainer";
     // Hides Flash box. We cannot use display: none or visibility: hidden because it prevents
@@ -297,7 +261,7 @@
     // See this article for hasPriority:
     // http://help.adobe.com/en_US/as3/mobile/WS4bebcd66a74275c36cfb8137124318eebc6-7ffd.html
     swfobject.embedSWF(
-      WEB_SOCKET_SWF_LOCATION,
+      __swfLocation,
       "webSocketFlash",
       "1" /* width */,
       "1" /* height */,
@@ -386,13 +350,9 @@
     return mimeType.enabledPlugin.filename.match(/flashlite/i) ? true : false;
   };
   
-  if (!window.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION) {
-    // NOTE:
-    //   This fires immediately if web_socket.js is dynamically loaded after
-    //   the document is loaded.
-    swfobject.addDomLoadEvent(function() {
-      WebSocket.__initialize();
-    });
-  }
-  
+  swfobject.addDomLoadEvent(function() {
+    WebSocket.__initialize();
+  });
+
+  return WebSocket;
 })();
