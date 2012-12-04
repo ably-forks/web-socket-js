@@ -3,18 +3,19 @@
 // Reference: http://dev.w3.org/html5/websockets/
 // Reference: http://tools.ietf.org/html/rfc6455
 
-this.FlashWebSocket = (function() {
+var FlashWebSocket = (function() {
 
   var protocol = window.location.protocol;
   var __swfLocation
     = protocol
     + '//'
-    + Defaults.HOST
+    + Defaults.CDN_HOST
     + ':'
-    + (protocol == 'https:') ? Defaults.WSS_PORT : Defaults.WS_PORT
-    + Defaults.STATIC_PATH
+    + ((protocol == 'https:') ? Defaults.CDN_HTTPS_PORT : Defaults.CDN_HTTP_PORT)
+    + Defaults.CDN_STATIC_PATH
     + 'WebSocketMainInsecure.swf';
-  
+console.log('swf at: ' + __swfLocation);
+
   if (window.console && window.console.log && window.console.error) {
     // In some environment, console is defined but console.log or console.error is missing.
 	logger = window.console;
@@ -30,7 +31,7 @@ this.FlashWebSocket = (function() {
    * @param {int} proxyPort
    * @param {string} headers
    */
-  WebSocket = function(url, protocols, proxyHost, proxyPort, headers) {
+  var WebSocket = function(url, protocols, proxyHost, proxyPort, headers) {
     var self = this;
     self.__id = WebSocket.__nextId++;
     WebSocket.__instances[self.__id] = self;
