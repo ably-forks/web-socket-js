@@ -5,17 +5,6 @@
 
 var FlashWebSocket = (function() {
 
-  var protocol = window.location.protocol;
-  var __swfLocation
-    = protocol
-    + '//'
-    + Defaults.CDN_HOST
-    + ':'
-    + ((protocol == 'https:') ? Defaults.CDN_HTTPS_PORT : Defaults.CDN_HTTP_PORT)
-    + Defaults.CDN_STATIC_PATH
-    + 'WebSocketMainInsecure.swf';
-console.log('swf at: ' + __swfLocation);
-
   if (window.console && window.console.log && window.console.error) {
     // In some environment, console is defined but console.log or console.error is missing.
 	logger = window.console;
@@ -262,7 +251,7 @@ console.log('swf at: ' + __swfLocation);
     // See this article for hasPriority:
     // http://help.adobe.com/en_US/as3/mobile/WS4bebcd66a74275c36cfb8137124318eebc6-7ffd.html
     swfobject.embedSWF(
-      __swfLocation,
+      Defaults.flashTransport.swfLocation,
       "webSocketFlash",
       "1" /* width */,
       "1" /* height */,
@@ -350,10 +339,6 @@ console.log('swf at: ' + __swfLocation);
     }
     return mimeType.enabledPlugin.filename.match(/flashlite/i) ? true : false;
   };
-  
-  swfobject.addDomLoadEvent(function() {
-    WebSocket.__initialize();
-  });
 
   return WebSocket;
 })();
