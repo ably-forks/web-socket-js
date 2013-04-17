@@ -4,6 +4,7 @@
 // Reference: http://tools.ietf.org/html/rfc6455
 
 var FlashWebSocket = (function() {
+  window.WebSocket = window.WebSocket || {};
 
   if (window.console && window.console.log && window.console.error) {
     // In some environment, console is defined but console.log or console.error is missing.
@@ -224,7 +225,7 @@ var FlashWebSocket = (function() {
   /**
    * Loads WebSocketMain.swf and creates WebSocketMain object in Flash.
    */
-  WebSocket.__initialize = function() {
+  WebSocket.__initialize = function(swfLocation) {
     
     if (WebSocket.__initialized) return;
     WebSocket.__initialized = true;
@@ -251,7 +252,7 @@ var FlashWebSocket = (function() {
     // See this article for hasPriority:
     // http://help.adobe.com/en_US/as3/mobile/WS4bebcd66a74275c36cfb8137124318eebc6-7ffd.html
     swfobject.embedSWF(
-      Defaults.flashTransport.swfLocation,
+      swfLocation,
       "webSocketFlash",
       "1" /* width */,
       "1" /* height */,
@@ -273,7 +274,7 @@ var FlashWebSocket = (function() {
    * Called by Flash to notify JS that it's fully loaded and ready
    * for communication.
    */
-  WebSocket.__onFlashInitialized = function() {
+  window.WebSocket.__onFlashInitialized = WebSocket.__onFlashInitialized = function() {
     // We need to set a timeout here to avoid round-trip calls
     // to flash during the initialization process.
     setTimeout(function() {
@@ -290,7 +291,7 @@ var FlashWebSocket = (function() {
   /**
    * Called by Flash to notify WebSockets events are fired.
    */
-  WebSocket.__onFlashEvent = function() {
+  window.WebSocket.__onFlashEvent = WebSocket.__onFlashEvent = function() {
     setTimeout(function() {
       try {
         // Gets events using receiveEvents() instead of getting it from event object
@@ -308,12 +309,12 @@ var FlashWebSocket = (function() {
   };
   
   // Called by Flash.
-  WebSocket.__log = function(message) {
+  window.WebSocket.__log = WebSocket.__log = function(message) {
     logger.log(decodeURIComponent(message));
   };
   
   // Called by Flash.
-  WebSocket.__error = function(message) {
+  window.WebSocket.__error = WebSocket.__error = function(message) {
     logger.error(decodeURIComponent(message));
   };
   
